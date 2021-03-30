@@ -13,6 +13,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+function ux_gmb_hours_dynamic_render_callback( $attributes ) {
+	// echo '<pre>';
+	// echo print_r($attributes);
+	// echo '</pre>';
+	$class = 'hours-container';
+	$list_item_markup = sprintf('<div class="%1$s">', $class);
+
+	if ( isset( $attributes['hours'] ) ) {
+		$hours = $attributes['hours'];
+		foreach ( $hours as $h ) {
+			list($day, $hour) = preg_split('[\:\s]', $h);
+			$list_item_markup .= sprintf(
+				'<div class="%1$s"><div class="day-name">%2$s</div><div class="day-hours">%3$s</div></div>',
+				'hours',
+				esc_html( $day ),
+				esc_html( $hour )
+			);
+		}
+	}
+
+	$list_item_markup .= '</div>';
+	return $list_item_markup;
+}
+
 /**
  * Enqueue Gutenberg block assets for both frontend + backend.
  *
@@ -92,6 +116,8 @@ function ux_my_business_hours_cgb_block_assets() { // phpcs:ignore
 					'default' => [],
 				),
 			),
+			// server side rendering callback
+			'render_callback' => 'ux_gmb_hours_dynamic_render_callback',
 			// Enqueue blocks.style.build.css on both frontend & backend.
 			'style'         => 'ux_gmb_hours-styles',
 			// Enqueue blocks.build.js in the editor only.
