@@ -5,11 +5,8 @@
  * which makes it higher in priority.
  */
 
-.wp-block-cgb-block-ux-gmb-hours  {
-  background: $green;
-  border: 0.2rem solid $black;
-  color: $black;
-  margin: 0 auto;
-  max-width: 740px;
-  padding: 2rem;
+.wp-block-ux-block-ux-gmb-hours  {
+	.hours-container {
+		padding: 0;
+	}
 }
