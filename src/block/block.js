@@ -1,16 +1,16 @@
 /**
- * BLOCK: ux-gmb-hours
+ * BLOCK: ux-my-business-hours
  *
  * Registering a basic block with Gutenberg.
  * Simple block, renders and saves the same content without any interactivity.
  */
-
 //  Import CSS.
 import './editor.scss';
 import './style.scss';
 
 const { __ } = wp.i18n; // Import __() from wp.i18n
 const { registerBlockType } = wp.blocks; // Import registerBlockType() from wp.blocks
+const { BlockControls } = wp.editor;
 
 /**
  * Register: aa Gutenberg Block.
@@ -51,21 +51,45 @@ registerBlockType( 'ux/block-ux-gmb-hours', {
    * @returns {Mixed} JSX Component.
    */
 	edit: ( props ) => {
-		// Creates a <p class='wp-block-cgb-block-ux-gmb-hours'></p>.
+		// https://developers.google.com/maps/documentation/javascript/places#place_details
+		function getGMBfields() {
+			const request = {
+				placeId: 'ChIJiQfqu_6ipBIRMIL1GKXlOmI',
+				fields: [ 'id', 'icon', 'name', 'formatted_address', 'vicinity', 'url', 'opening_hours' ],
+			};
+			const service = new google.maps.places.PlacesService( document.getElementById( 'uxGMB' ) );
+			service.getDetails( request, callback );
+			function callback( place, status ) {
+				if ( status === google.maps.places.PlacesServiceStatus.OK ) {
+          console.log('res > ', place); // eslint-disable-line
+					props.setAttributes( { hours: place.opening_hours.weekday_text } );
+				}
+			}
+		}
+
+		const onGetHours = () => {
+			getGMBfields();
+		};
+
 		return (
-			<div className={ props.className }>
-				<p>— Hello from the backend.</p>
-				<p>
-					CGB BLOCK: <code>ux-gmb-hours</code> is a new Gutenberg block
-				</p>
-				<p>
-					It was created via{ ' ' }
-					<code>
-						<a href="https://github.com/ahmadawais/create-guten-block">
-							create-guten-block
-						</a>
-					</code>.
-				</p>
+			<div className={ props.className } id="uxGMB">
+				<BlockControls>
+					<ToolbarGroup>
+						<ToolbarButton
+							isPrimary
+							icon="update-alt"
+							label="Get Hours from Google My Business"
+							onClick={ () => onGetHours() }
+						/>
+					</ToolbarGroup>
+				</BlockControls>
+
+				<div className="hours-container">
+					<ServerSideRender
+						block="ux/block-ux-gmb-hours"
+						attributes={ props.attributes }
+					/>
+				</div>
 			</div>
 		);
 	},
