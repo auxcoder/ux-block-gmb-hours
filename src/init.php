@@ -28,6 +28,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  */
 function ux_my_business_hours_cgb_block_assets() { // phpcs:ignore
+	// Register block editor script for backend.
+	wp_register_script(
+		'ux_gmb-block-lib', // Handle.
+		'https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ_ZCaWdaBdVsyhX5KcwR-N_dZ1xKYK5A&libraries=places',
+		array(), // Dependencies.
+		null, // // Version: filemtime — Gets file modification time.
+		true // Enqueue the script in the footer.
+	);
+	// https://developers.google.com/maps/documentation/javascript/places
+
 	// Register block styles for both frontend + backend.
 	wp_register_style(
 		'ux_gmb_hours-styles', // Handle.
