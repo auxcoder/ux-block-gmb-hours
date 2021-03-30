@@ -5,12 +5,36 @@
  * Enqueue CSS/JS of all the blocks.
  *
  * @since   1.0.0
- * @package CGB
+ * @package UXB
  */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+function ux_gmb_hours_dynamic_render_callback( $attributes ) {
+	// echo '<pre>';
+	// echo print_r($attributes);
+	// echo '</pre>';
+	$class = 'hours-container';
+	$list_item_markup = sprintf('<div class="%1$s">', $class);
+
+	if ( isset( $attributes['hours'] ) ) {
+		$hours = $attributes['hours'];
+		foreach ( $hours as $h ) {
+			list($day, $hour) = preg_split('[\:\s]', $h);
+			$list_item_markup .= sprintf(
+				'<div class="%1$s"><div class="day-name">%2$s</div><div class="day-hours">%3$s</div></div>',
+				'hours',
+				esc_html( $day ),
+				esc_html( $hour )
+			);
+		}
+	}
+
+	$list_item_markup .= '</div>';
+	return $list_item_markup;
 }
 
 /**
@@ -27,10 +51,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @uses {wp-editor} for WP editor styles.
  * @since 1.0.0
  */
-function ux_gmb_hours_cgb_block_assets() { // phpcs:ignore
+function ux_my_business_hours_cgb_block_assets() { // phpcs:ignore
+	// Register block editor script for backend.
+	wp_register_script(
+		'ux_gmb-block-lib', // Handle.
+		'https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ_ZCaWdaBdVsyhX5KcwR-N_dZ1xKYK5A&libraries=places',
+		array(), // Dependencies.
+		null, // // Version: filemtime — Gets file modification time.
+		true // Enqueue the script in the footer.
+	);
+	// https://developers.google.com/maps/documentation/javascript/places
+
 	// Register block styles for both frontend + backend.
 	wp_register_style(
-		'ux_gmb_hours-cgb-style-css', // Handle.
+		'ux_gmb_hours-styles', // Handle.
 		plugins_url( 'dist/blocks.style.build.css', dirname( __FILE__ ) ), // Block style CSS.
 		is_admin() ? array( 'wp-editor' ) : null, // Dependency to include the CSS after it.
 		null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.style.build.css' ) // Version: File modification time.
@@ -38,29 +72,29 @@ function ux_gmb_hours_cgb_block_assets() { // phpcs:ignore
 
 	// Register block editor script for backend.
 	wp_register_script(
-		'ux_gmb_hours-cgb-block-js', // Handle.
+		'ux_gmb-block-styles', // Handle.
 		plugins_url( '/dist/blocks.build.js', dirname( __FILE__ ) ), // Block.build.js: We register the block here. Built with Webpack.
-		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor' ), // Dependencies, defined above.
+		array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-components', 'ux_gmb-block-lib' ), // Dependencies, defined above.
 		null, // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.build.js' ), // Version: filemtime — Gets file modification time.
 		true // Enqueue the script in the footer.
 	);
 
 	// Register block editor styles for backend.
 	wp_register_style(
-		'ux_gmb_hours-cgb-block-editor-css', // Handle.
+		'ux_gmb-block-editor', // Handle.
 		plugins_url( 'dist/blocks.editor.build.css', dirname( __FILE__ ) ), // Block editor CSS.
 		array( 'wp-edit-blocks' ), // Dependency to include the CSS after it.
 		null // filemtime( plugin_dir_path( __DIR__ ) . 'dist/blocks.editor.build.css' ) // Version: File modification time.
 	);
 
-	// WP Localized globals. Use dynamic PHP stuff in JavaScript via `cgbGlobal` object.
+	// WP Localized globals. Use dynamic PHP stuff in JavaScript via `uxbGlobal` object.
 	wp_localize_script(
-		'ux_gmb_hours-cgb-block-js',
-		'cgbGlobal', // Array containing dynamic data for a JS Global.
+		'ux_gmb-block-styles',
+		'uxbGlobal', // Array containing dynamic data for a JS Global.
 		[
 			'pluginDirPath' => plugin_dir_path( __DIR__ ),
 			'pluginDirUrl'  => plugin_dir_url( __DIR__ ),
-			// Add more data here that you want to access from `cgbGlobal` object.
+			// Add more data here that you want to access from `uxbGlobal` object.
 		]
 	);
 
@@ -75,16 +109,24 @@ function ux_gmb_hours_cgb_block_assets() { // phpcs:ignore
 	 * @since 1.16.0
 	 */
 	register_block_type(
-		'cgb/block-ux-gmb-hours', array(
+		'ux/block-ux-gmb-hours', array(
+			'attributes' => array(
+				'hours' => array(
+					'type' => 'object',
+					'default' => [],
+				),
+			),
+			// server side rendering callback
+			'render_callback' => 'ux_gmb_hours_dynamic_render_callback',
 			// Enqueue blocks.style.build.css on both frontend & backend.
-			'style'         => 'ux_gmb_hours-cgb-style-css',
+			'style'         => 'ux_gmb_hours-styles',
 			// Enqueue blocks.build.js in the editor only.
-			'editor_script' => 'ux_gmb_hours-cgb-block-js',
+			'editor_script' => 'ux_gmb-block-styles',
 			// Enqueue blocks.editor.build.css in the editor only.
-			'editor_style'  => 'ux_gmb_hours-cgb-block-editor-css',
+			'editor_style'  => 'ux_gmb-block-editor',
 		)
 	);
 }
 
 // Hook: Block assets.
-add_action( 'init', 'ux_gmb_hours_cgb_block_assets' );
+add_action( 'init', 'ux_my_business_hours_cgb_block_assets' );

@@ -4,11 +4,23 @@
  * CSS for both Frontend+Backend.
  */
 
-.wp-block-cgb-block-ux-gmb-hours  {
-  background: $red;
-  border: 0.2rem solid $black;
+ .hours {
+	 color: var(--bs-primary);
+	 display: flex;
+	 justify-content: space-between;
+	 width: 250px;
+	 padding: 5px 0;
+	.day-name {
+		text-transform: uppercase;
+	}
+	.day-hours {
+		font-weight: 600;
+		width: 50%;
+		white-space: nowrap;
+		text-align: right;
+	 }
+ }
+
+.wp-block-ux-block-ux-my-business-hours  {
   color: $black;
-  margin: 0 auto;
-  max-width: 740px;
-  padding: 2rem;
 }
